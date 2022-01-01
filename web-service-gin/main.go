@@ -24,6 +24,7 @@ func main() {
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbum)
+	router.PATCH("/albums/:id", patchAlbum)
 	router.POST("/albums", postAlbums)
 
 	router.Run("localhost:8080")
@@ -63,4 +64,25 @@ func getAlbum(c *gin.Context) {
 		}
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}
+
+// Update album data, requires all album fields
+func patchAlbum(c *gin.Context) {
+	id := c.Param("id")
+	var updated album
+
+	// Call BindJSON to bind the received JSON to updated
+	if err := c.BindJSON(&updated); err != nil {
+		return
+	}
+
+	for idx, a := range albums {
+		if a.ID == id {
+			albums[idx] = updated
+			c.IndentedJSON(http.StatusOK, updated)
+			return
+		}
+	}
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+
 }
